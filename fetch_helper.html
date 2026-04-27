@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body>
+<div id="status">Carregando...</div>
+<div id="count"></div>
+<script>
+const T = "?t=02bffab4f96465d97d3767a5c38765c19fd240d156ebabcd10fb0011d1580e5a.7f77afdd-bed8-4d1a-8ed3-3844adf2ed5b.a8f467f8-f61e-4d7b-baed-5be1b29659cd.1777259285";
+const BASE = "https://fc69420c-b77d-4253-9e49-160fbb3c32bc.claudeusercontent.com/v1/design/projects/fc69420c-b77d-4253-9e49-160fbb3c32bc/serve/uploads/";
+const files = [
+  "Sistema%20PDV%20Completo%20e%20Inteligente.png",
+  "Jimi%20Rob%C3%B4%20Totalmente%20Integrado.png",
+  "Totens%20que%20Aumentam%20seu%20Ticket%20M%C3%A9dio.png",
+  "Catracas%20para%20Mais%20Controle%20e%20Seguran%C3%A7a.png",
+  "Antenas%20Antifurto%20Integradas.png",
+  "Comandas%20Eletr%C3%B4nicas%20e%20Impress%C3%A3o%20Autom%C3%A1tica.png",
+  "balan%C3%A7a.png",
+  "Leitores%20de%20C%C3%B3digo%20de%20Barras%20e%20RFID.png",
+  "Impressoras%20Conectadas%20Direto%20na%20Produ%C3%A7%C3%A3o.png",
+  "Aplicativo%20de%20Gar%C3%A7om%20para%20Android.png",
+  "Pedidos%20pelas%20Maquininhas%20Stone%20e%20Maquinona.png",
+  "ifood.png",
+  "Card%C3%A1pio%20Digital%20Inteligente%20para%20Delivery.png",
+  "sistema%20de%20fideliza%C3%A7%C3%A3o.png",
+];
+
+function fetchB64(url) {
+  return fetch(url)
+    .then(function(r) { return r.blob(); })
+    .then(function(blob) {
+      return new Promise(function(res) {
+        var r = new FileReader();
+        r.onload = function() { res(r.result); };
+        r.readAsDataURL(blob);
+      });
+    });
+}
+
+Promise.all(files.map(function(f) { return fetchB64(BASE + f + T); }))
+  .then(function(results) {
+    window.__allB64 = results;
+    localStorage.setItem('imgb64count', results.length);
+    // store each separately to avoid localStorage size limits per key
+    results.forEach(function(b64, i) {
+      localStorage.setItem('imgb64_' + i, b64);
+    });
+    document.getElementById('status').textContent = 'ALL DONE';
+    document.getElementById('count').textContent = 'Count: ' + results.length;
+  })
+  .catch(function(e) {
+    document.getElementById('status').textContent = 'ERROR: ' + e.message;
+  });
+</script>
+</body>
+</html>

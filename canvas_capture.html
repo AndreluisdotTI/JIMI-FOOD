@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+*{margin:0;padding:0;}
+body{width:1200px;background:#fff;}
+canvas{display:block;}
+#status{font-family:sans-serif;padding:10px;font-size:14px;color:#333;}
+</style>
+</head>
+<body>
+<div id="status">READY — waiting for trigger</div>
+<canvas id="c" width="1200" height="750"></canvas>
+<script>
+var BASE = "https://fc69420c-b77d-4253-9e49-160fbb3c32bc.claudeusercontent.com/v1/design/projects/fc69420c-b77d-4253-9e49-160fbb3c32bc/serve/uploads/";
+var files = [
+  "Jimi%20Rob%C3%B4%20Totalmente%20Integrado.png",
+  "Totens%20que%20Aumentam%20seu%20Ticket%20M%C3%A9dio.png",
+  "Catracas%20para%20Mais%20Controle%20e%20Seguran%C3%A7a.png",
+  "Comandas%20Eletr%C3%B4nicas%20e%20Impress%C3%A3o%20Autom%C3%A1tica.png",
+  "balan%C3%A7a.png",
+  "Leitores%20de%20C%C3%B3digo%20de%20Barras%20e%20RFID.png",
+  "Impressoras%20Conectadas%20Direto%20na%20Produ%C3%A7%C3%A3o.png",
+  "Aplicativo%20de%20Gar%C3%A7om%20para%20Android.png",
+  "Card%C3%A1pio%20Digital%20Inteligente%20para%20Delivery.png",
+  "sistema%20de%20fideliza%C3%A7%C3%A3o.png"
+];
+
+window.__b64s = [];
+window.__fetched = false;
+
+window.triggerFetch = function(token) {
+  document.getElementById('status').textContent = 'Fetching with token...';
+  var urls = files.map(function(f){ return BASE + f + '?t=' + token; });
+  Promise.all(urls.map(function(url) {
+    return fetch(url)
+      .then(function(r){ return r.blob(); })
+      .then(function(b){ return new Promise(function(res){ var r=new FileReader(); r.onload=function(){res(r.result);}; r.readAsDataURL(b); }); });
+  })).then(function(results){
+    window.__b64s = results;
+    window.__fetched = true;
+    document.getElementById('status').textContent = 'ALL_FETCHED:' + results.length + ' sizes:' + results.map(function(s){return Math.round(s.length/1024)+'k';}).join(',');
+  }).catch(function(e){
+    document.getElementById('status').textContent = 'ERROR:' + e.message;
+  });
+};
+
+window.showOnCanvas = function(idx) {
+  return new Promise(function(resolve) {
+    if (!window.__b64s[idx]) { document.getElementById('status').textContent = 'NO_DATA:'+idx; resolve(); return; }
+    var img = new Image();
+    img.onload = function() {
+      var c = document.getElementById('c');
+      var ctx = c.getContext('2d');
+      var scale = Math.min(1200/img.width, 750/img.height);
+      var w = Math.round(img.width*scale), h = Math.round(img.height*scale);
+      c.width = w; c.height = h;
+      ctx.clearRect(0,0,w,h);
+      ctx.drawImage(img, 0, 0, w, h);
+      document.getElementById('status').textContent = 'CANVAS_READY:'+idx;
+      resolve();
+    };
+    img.onerror = function(){ document.getElementById('status').textContent = 'IMG_ERR:'+idx; resolve(); };
+    img.src = window.__b64s[idx];
+  });
+};
+</script>
+</body>
+</html>
